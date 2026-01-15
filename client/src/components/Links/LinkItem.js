@@ -2,13 +2,21 @@ import React, { useContext } from 'react';
 import { DataContext } from '../../context/DataContext';
 import './Links.css';
 
-const LinkItem = ({ link, onEdit }) => {
+const LinkItem = ({ link, onEdit, viewMode = 'card' }) => {
   const { deleteLink } = useContext(DataContext);
 
-  const handleDelete = async () => {
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (window.confirm('Are you sure you want to delete this link?')) {
       await deleteLink(link._id);
     }
+  };
+
+  const handleEdit = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onEdit(link);
   };
 
   const formatUrl = (url) => {
@@ -20,6 +28,34 @@ const LinkItem = ({ link, onEdit }) => {
     }
   };
 
+  const getInitials = (title) => {
+    if (!title) return '🔗';
+    return title.substring(0, 2).toUpperCase();
+  };
+
+  const handleLinkClick = (e) => {
+    if (viewMode === 'circle') {
+      window.open(link.url, '_blank', 'noopener noreferrer');
+    }
+  };
+
+  // Circle view mode for inside sections
+  if (viewMode === 'circle') {
+    return (
+      <div className="link-circle" onClick={handleLinkClick}>
+        <div className="circle-icon">
+          {getInitials(link.title)}
+        </div>
+        <div className="circle-title">{link.title || formatUrl(link.url)}</div>
+        <div className="circle-actions">
+          <button onClick={handleEdit} className="btn-circle-edit" title="Edit">✎</button>
+          <button onClick={handleDelete} className="btn-circle-delete" title="Delete">🗑</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Card view mode (default)
   return (
     <div className="link-item">
       <div className="link-header">
@@ -27,7 +63,7 @@ const LinkItem = ({ link, onEdit }) => {
           {link.title || formatUrl(link.url)}
         </a>
         <div className="link-actions">
-          <button onClick={() => onEdit(link)} className="btn-edit">✎</button>
+          <button onClick={handleEdit} className="btn-edit">✎</button>
           <button onClick={handleDelete} className="btn-delete">🗑</button>
         </div>
       </div>

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
 const {
   getLinks,
   getTags,
@@ -8,9 +7,6 @@ const {
   updateLink,
   deleteLink
 } = require('../controllers/linkController');
-
-// All routes require authentication
-router.use(authMiddleware);
 
 // GET /api/links - Get all links (with optional filters)
 router.get('/', getLinks);

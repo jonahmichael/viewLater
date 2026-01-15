@@ -21,12 +21,12 @@ const linkSchema = new mongoose.Schema({
   section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Section',
-    required: true
+    required: false
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   }
 }, {
   timestamps: true

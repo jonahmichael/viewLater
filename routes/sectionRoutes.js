@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
 const {
   getSections,
   createSection,
   updateSection,
   deleteSection
 } = require('../controllers/sectionController');
-
-// All routes require authentication
-router.use(authMiddleware);
 
 // GET /api/sections - Get all sections
 router.get('/', getSections);

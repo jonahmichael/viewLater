@@ -2,14 +2,14 @@ import React, { useState, useContext, useEffect } from 'react';
 import { DataContext } from '../../context/DataContext';
 import './Links.css';
 
-const LinkForm = ({ editingLink, onClose }) => {
+const LinkForm = ({ editingLink, defaultSection, onClose }) => {
   const { sections, createLink, updateLink } = useContext(DataContext);
   
   const [formData, setFormData] = useState({
     url: '',
     title: '',
     description: '',
-    section: '',
+    section: defaultSection?._id || '',
     tags: ''
   });
 
@@ -22,8 +22,13 @@ const LinkForm = ({ editingLink, onClose }) => {
         section: editingLink.section?._id || '',
         tags: editingLink.tags?.join(', ') || ''
       });
+    } else if (defaultSection) {
+      setFormData(prev => ({
+        ...prev,
+        section: defaultSection._id
+      }));
     }
-  }, [editingLink]);
+  }, [editingLink, defaultSection]);
 
   const handleChange = (e) => {
     setFormData({
@@ -96,14 +101,13 @@ const LinkForm = ({ editingLink, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Section *</label>
+            <label>Section</label>
             <select
               name="section"
               value={formData.section}
               onChange={handleChange}
-              required
             >
-              <option value="">Select a section</option>
+              <option value="">Unlisted (No section)</option>
               {sections.map((section) => (
                 <option key={section._id} value={section._id}>
                   {section.name}
@@ -124,7 +128,7 @@ const LinkForm = ({ editingLink, onClose }) => {
           </div>
 
           <div className="form-actions">
-            <button type="button" onClick={onClose} className="btn-secondary">
+            <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
             <button type="submit" className="btn-primary">

@@ -1,12 +1,12 @@
 const Link = require('../models/Link');
 
-// Get all links for logged-in user
+// Get all links
 const getLinks = async (req, res) => {
   try {
     const { section, search, tags } = req.query;
     
     // Build query
-    let query = { user: req.user.userId };
+    let query = {};
     
     if (section) {
       query.section = section;
@@ -34,10 +34,10 @@ const getLinks = async (req, res) => {
   }
 };
 
-// Get all unique tags for logged-in user
+// Get all unique tags
 const getTags = async (req, res) => {
   try {
-    const links = await Link.find({ user: req.user.userId });
+    const links = await Link.find({});
     const tags = [...new Set(links.flatMap(link => link.tags))];
     res.json(tags);
   } catch (error) {
@@ -50,8 +50,8 @@ const createLink = async (req, res) => {
   try {
     const { url, title, description, tags, section } = req.body;
 
-    if (!url || !section) {
-      return res.status(400).json({ message: 'URL and section are required' });
+    if (!url) {
+      return res.status(400).json({ message: 'URL is required' });
     }
 
     const link = await Link.create({
@@ -59,8 +59,7 @@ const createLink = async (req, res) => {
       title,
       description,
       tags: tags || [],
-      section,
-      user: req.user.userId
+      section: section || null
     });
 
     const populatedLink = await Link.findById(link._id).populate('section', 'name');
@@ -77,7 +76,7 @@ const updateLink = async (req, res) => {
     const { url, title, description, tags, section } = req.body;
     const { id } = req.params;
 
-    const link = await Link.findOne({ _id: id, user: req.user.userId });
+    const link = await Link.findById(id);
 
     if (!link) {
       return res.status(404).json({ message: 'Link not found' });
@@ -104,7 +103,7 @@ const deleteLink = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const link = await Link.findOne({ _id: id, user: req.user.userId });
+    const link = await Link.findById(id);
 
     if (!link) {
       return res.status(404).json({ message: 'Link not found' });

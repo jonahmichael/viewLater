@@ -1,11 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import api from '../api/api';
-import { AuthContext } from './AuthContext';
+import React, { createContext, useState, useEffect } from 'react';
 
 export const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-  const { user } = useContext(AuthContext);
   const [sections, setSections] = useState([]);
   const [links, setLinks] = useState([]);
   const [tags, setTags] = useState([]);
@@ -14,129 +11,168 @@ export const DataProvider = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch sections
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedSections = localStorage.getItem('viewlater_sections');
+    const savedLinks = localStorage.getItem('viewlater_links');
+    
+    if (savedSections) {
+      setSections(JSON.parse(savedSections));
+    }
+    if (savedLinks) {
+      const parsedLinks = JSON.parse(savedLinks);
+      setLinks(parsedLinks);
+      updateTags(parsedLinks);
+    }
+  }, []);
+
+  // Save sections to localStorage whenever they change
+  useEffect(() => {
+    if (sections.length > 0 || localStorage.getItem('viewlater_sections')) {
+      localStorage.setItem('viewlater_sections', JSON.stringify(sections));
+    }
+  }, [sections]);
+
+  // Save links to localStorage whenever they change
+  useEffect(() => {
+    if (links.length > 0 || localStorage.getItem('viewlater_links')) {
+      localStorage.setItem('viewlater_links', JSON.stringify(links));
+    }
+  }, [links]);
+
+  // Update tags from links
+  const updateTags = (linksList) => {
+    const allTags = linksList.flatMap(link => link.tags || []);
+    const uniqueTags = [...new Set(allTags)];
+    setTags(uniqueTags);
+  };
+
+  // Fetch sections (now just returns from state)
   const fetchSections = async () => {
-    if (!user) return;
-    try {
-      const response = await api.get('/sections');
-      setSections(response.data);
-    } catch (error) {
-      console.error('Error fetching sections:', error);
-    }
+    // Data is already in state from localStorage
+    return sections;
   };
 
-  // Fetch links with filters
+  // Fetch links with filters (now filters from state)
   const fetchLinks = async () => {
-    if (!user) return;
     setLoading(true);
-    try {
-      const params = {};
-      if (selectedSection) params.section = selectedSection;
-      if (searchQuery) params.search = searchQuery;
-      if (selectedTags.length > 0) params.tags = selectedTags.join(',');
-
-      const response = await api.get('/links', { params });
-      setLinks(response.data);
-    } catch (error) {
-      console.error('Error fetching links:', error);
+    
+    let filteredLinks = [...links];
+    
+    // Filter by section
+    if (selectedSection && selectedSection !== 'unlisted') {
+      filteredLinks = filteredLinks.filter(link => link.section?._id === selectedSection);
+    } else if (selectedSection === 'unlisted') {
+      filteredLinks = filteredLinks.filter(link => !link.section);
     }
+    
+    // Filter by search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filteredLinks = filteredLinks.filter(link => 
+        link.title?.toLowerCase().includes(query) || 
+        link.url?.toLowerCase().includes(query) ||
+        link.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    // Filter by tags
+    if (selectedTags.length > 0) {
+      filteredLinks = filteredLinks.filter(link => 
+        link.tags?.some(tag => selectedTags.includes(tag))
+      );
+    }
+    
     setLoading(false);
+    return filteredLinks;
   };
 
-  // Fetch tags
+  // Fetch tags (now just returns from state)
   const fetchTags = async () => {
-    if (!user) return;
-    try {
-      const response = await api.get('/links/tags');
-      setTags(response.data);
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-    }
+    return tags;
   };
 
   // Create section
   const createSection = async (name) => {
-    try {
-      const response = await api.post('/sections', { name });
-      setSections([...sections, response.data]);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    const newSection = {
+      _id: Date.now().toString(),
+      name,
+      createdAt: new Date().toISOString()
+    };
+    setSections([...sections, newSection]);
+    return { success: true, data: newSection };
   };
 
   // Update section
   const updateSection = async (id, name) => {
-    try {
-      const response = await api.put(`/sections/${id}`, { name });
-      setSections(sections.map(s => s._id === id ? response.data : s));
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    setSections(sections.map(s => s._id === id ? { ...s, name } : s));
+    return { success: true };
   };
 
   // Delete section
   const deleteSection = async (id) => {
-    try {
-      await api.delete(`/sections/${id}`);
-      setSections(sections.filter(s => s._id !== id));
-      if (selectedSection === id) setSelectedSection(null);
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    setSections(sections.filter(s => s._id !== id));
+    // Also update links that were in this section
+    setLinks(links.map(link => 
+      link.section?._id === id ? { ...link, section: null } : link
+    ));
+    if (selectedSection === id) setSelectedSection(null);
+    return { success: true };
   };
 
   // Create link
   const createLink = async (linkData) => {
-    try {
-      const response = await api.post('/links', linkData);
-      setLinks([response.data, ...links]);
-      fetchTags(); // Refresh tags
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    const section = sections.find(s => s._id === linkData.section);
+    const newLink = {
+      _id: Date.now().toString(),
+      url: linkData.url,
+      title: linkData.title,
+      description: linkData.description,
+      tags: linkData.tags || [],
+      section: section ? { _id: section._id, name: section.name } : null,
+      createdAt: new Date().toISOString()
+    };
+    const updatedLinks = [newLink, ...links];
+    setLinks(updatedLinks);
+    updateTags(updatedLinks);
+    return { success: true, data: newLink };
   };
 
   // Update link
   const updateLink = async (id, linkData) => {
-    try {
-      const response = await api.put(`/links/${id}`, linkData);
-      setLinks(links.map(l => l._id === id ? response.data : l));
-      fetchTags(); // Refresh tags
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    const section = sections.find(s => s._id === linkData.section);
+    const updatedLinks = links.map(link => 
+      link._id === id ? {
+        ...link,
+        url: linkData.url,
+        title: linkData.title,
+        description: linkData.description,
+        tags: linkData.tags || [],
+        section: section ? { _id: section._id, name: section.name } : null
+      } : link
+    );
+    setLinks(updatedLinks);
+    updateTags(updatedLinks);
+    return { success: true };
   };
 
   // Delete link
   const deleteLink = async (id) => {
-    try {
-      await api.delete(`/links/${id}`);
-      setLinks(links.filter(l => l._id !== id));
-      fetchTags(); // Refresh tags
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message };
-    }
+    const updatedLinks = links.filter(link => link._id !== id);
+    setLinks(updatedLinks);
+    updateTags(updatedLinks);
+    return { success: true };
   };
 
   // Fetch data on mount and when filters change
   useEffect(() => {
-    if (user) {
-      fetchSections();
-      fetchTags();
-    }
-  }, [user]);
+    fetchSections();
+    fetchTags();
+  }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchLinks();
-    }
-  }, [user, selectedSection, selectedTags, searchQuery]);
+    fetchLinks();
+  }, [selectedSection, selectedTags, searchQuery]);
 
   return (
     <DataContext.Provider

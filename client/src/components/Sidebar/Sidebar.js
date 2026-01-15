@@ -2,14 +2,11 @@ import React, { useState, useContext } from 'react';
 import { DataContext } from '../../context/DataContext';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const {
     sections,
-    tags,
     selectedSection,
-    selectedTags,
     setSelectedSection,
-    setSelectedTags,
     createSection,
     updateSection,
     deleteSection
@@ -46,95 +43,69 @@ const Sidebar = () => {
     }
   };
 
-  const toggleTag = (tag) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
+  const handleSectionClick = (sectionId) => {
+    setSelectedSection(sectionId);
+    if (window.innerWidth <= 768) {
+      onClose();
     }
   };
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-section">
-        <div className="section-header">
+    <>
+      {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
           <h3>Sections</h3>
-          <button
-            className="btn-icon"
-            onClick={() => {
-              setShowSectionForm(!showSectionForm);
-              setEditingSectionId(null);
-              setSectionName('');
-            }}
-          >
-            {showSectionForm ? '✕' : '+'}
-          </button>
+          <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        {showSectionForm && (
-          <form onSubmit={handleCreateSection} className="section-form">
-            <input
-              type="text"
-              placeholder="Section name..."
-              value={sectionName}
-              onChange={(e) => setSectionName(e.target.value)}
-              autoFocus
-            />
-            <button type="submit" className="btn-small">
-              {editingSectionId ? 'Update' : 'Add'}
-            </button>
-          </form>
-        )}
+        <div className="sidebar-section">
+          {showSectionForm && (
+            <form onSubmit={handleCreateSection} className="section-form">
+              <input
+                type="text"
+                placeholder="Section name..."
+                value={sectionName}
+                onChange={(e) => setSectionName(e.target.value)}
+                autoFocus
+              />
+              <button type="submit" className="btn-small">
+                {editingSectionId ? 'Update' : 'Add'}
+              </button>
+            </form>
+          )}
 
-        <div className="section-list">
-          <div
-            className={`section-item ${!selectedSection ? 'active' : ''}`}
-            onClick={() => setSelectedSection(null)}
-          >
-            All Links
-          </div>
-          {sections.map((section) => (
+          <div className="section-list">
             <div
-              key={section._id}
-              className={`section-item ${selectedSection === section._id ? 'active' : ''}`}
+              className={`section-item ${!selectedSection ? 'active' : ''}`}
+              onClick={() => handleSectionClick(null)}
             >
-              <span onClick={() => setSelectedSection(section._id)}>
-                {section.name}
-              </span>
-              <div className="section-actions">
-                <button
-                  className="btn-action"
-                  onClick={() => handleEditSection(section)}
-                >
-                  ✎
-                </button>
-                <button
-                  className="btn-action"
-                  onClick={() => handleDeleteSection(section._id)}
-                >
-                  🗑
-                </button>
-              </div>
+              📌 All Sections
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="sidebar-section">
-        <h3>Tags</h3>
-        <div className="tag-list">
-          {tags.map((tag) => (
-            <button
-              key={tag}
-              className={`tag ${selectedTags.includes(tag) ? 'active' : ''}`}
-              onClick={() => toggleTag(tag)}
+            <div
+              className={`section-item ${selectedSection === 'unlisted' ? 'active' : ''}`}
+              onClick={() => handleSectionClick('unlisted')}
             >
-              {tag}
-            </button>
-          ))}
+              📂 Unlisted
+            </div>
+            {sections.map((section) => (
+              <div
+                key={section._id}
+                className={`section-item ${selectedSection === section._id ? 'active' : ''}`}
+              >
+                <span onClick={() => handleSectionClick(section._id)}>
+                  📁 {section.name}
+                </span>
+                <div className="section-actions">
+                  <button onClick={() => handleEditSection(section)}>✎</button>
+                  <button onClick={() => handleDeleteSection(section._id)}>🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 
