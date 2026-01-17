@@ -21,7 +21,7 @@ Click the "Fork" button on the top right of the repository page.
 ### 2. Clone Your Fork
 
 ```bash
-git clone https://github.com/your-username/ViewLater.git
+git clone https://github.com/jonahmichael/viewLater.git
 cd ViewLater
 ```
 
