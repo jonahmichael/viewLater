@@ -17,15 +17,17 @@ const Dashboard = () => {
     <div className="flex flex-col h-screen bg-background">
       <header className="bg-secondary border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-accent rounded-md transition-colors"
-            aria-label="Toggle sidebar"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <h1 className="text-2xl font-semibold">ViewLater</h1>
-          <div className="flex-1 max-w-md">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-accent rounded-md transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <h1 className="text-2xl font-semibold">ViewLater</h1>
+          </div>
+          <div className="flex-1 max-w-md ml-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
