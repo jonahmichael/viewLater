@@ -120,14 +120,17 @@ const LinkItem = ({ link, onEdit, viewMode = 'card' }) => {
 
       <CardFooter className="flex flex-col items-start gap-2 pt-2">
         <div className="flex flex-wrap gap-2">
-          {link.tags?.map((tag, index) => (
-            <span
-              key={index}
-              className="text-xs px-2 py-1 rounded-md bg-accent"
-            >
-              {tag}
-            </span>
-          ))}
+          {link.tags?.map((tag, index) => {
+            const tagName = typeof tag === 'object' ? tag.name : tag;
+            return (
+              <span
+                key={index}
+                className="text-xs px-2 py-1 rounded-md bg-accent"
+              >
+                {tagName}
+              </span>
+            );
+          })}
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground w-full">
           {link.section && (

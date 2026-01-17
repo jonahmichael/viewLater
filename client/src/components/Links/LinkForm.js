@@ -20,23 +20,28 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
     url: '',
     title: '',
     description: '',
-    section: defaultSection?._id || '',
+    section: defaultSection?.id || '',
     tags: ''
   });
 
   useEffect(() => {
     if (editingLink) {
+      // Handle tags whether they come as array of objects or array of strings
+      const tagNames = Array.isArray(editingLink.tags) 
+        ? editingLink.tags.map(tag => typeof tag === 'object' ? tag.name : tag).join(', ')
+        : '';
+      
       setFormData({
         url: editingLink.url,
         title: editingLink.title || '',
         description: editingLink.description || '',
-        section: editingLink.section?._id || '',
-        tags: editingLink.tags?.join(', ') || ''
+        section: editingLink.sectionId || editingLink.section?.id || '',
+        tags: tagNames
       });
     } else if (defaultSection) {
       setFormData(prev => ({
         ...prev,
-        section: defaultSection._id
+        section: defaultSection.id
       }));
     }
   }, [editingLink, defaultSection]);
@@ -60,7 +65,7 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
     };
 
     if (editingLink) {
-      await updateLink(editingLink._id, linkData);
+      await updateLink(editingLink.id, linkData);
     } else {
       await createLink(linkData);
     }
@@ -127,7 +132,7 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
             >
               <option value="">Unlisted (No section)</option>
               {sections.map((section) => (
-                <option key={section._id} value={section._id}>
+                <option key={section.id} value={section.id}>
                   {section.name}
                 </option>
               ))}

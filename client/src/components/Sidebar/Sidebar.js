@@ -132,16 +132,16 @@ const Sidebar = ({ isOpen, onClose }) => {
 
             {sections.map((section) => (
               <div
-                key={section._id}
+                key={section.id}
                 className={cn(
                   "group flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors",
-                  selectedSection === section._id
+                  selectedSection === section.id
                     ? "bg-accent text-accent-foreground font-medium"
                     : "hover:bg-accent/50"
                 )}
               >
                 <button
-                  onClick={() => handleSectionClick(section._id)}
+                  onClick={() => handleSectionClick(section.id)}
                   className="flex-1 flex items-center gap-3 text-left"
                 >
                   <Folder className="h-4 w-4" />

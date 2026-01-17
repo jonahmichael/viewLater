@@ -5,7 +5,7 @@ const {
   createSection,
   updateSection,
   deleteSection
-} = require('../controllers/sectionController');
+} = require('../controllers/sectionController.sequelize');
 
 // GET /api/sections - Get all sections
 router.get('/', getSections);

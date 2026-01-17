@@ -6,8 +6,12 @@ import Sidebar from '../Sidebar/Sidebar';
 import LinkList from '../Links/LinkList';
 
 const Dashboard = () => {
-  const { searchQuery, setSearchQuery } = useContext(DataContext);
+  const { searchQuery, searchLinks } = useContext(DataContext);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleSearch = (e) => {
+    searchLinks(e.target.value);
+  };
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -26,9 +30,9 @@ const Dashboard = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search links..."
+                placeholder="Search by title, description, section, or tags..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearch}
                 className="pl-10"
               />
             </div>

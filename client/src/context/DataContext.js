@@ -168,10 +168,12 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchSections();
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchLinks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSection, selectedTags, searchQuery]);
 
   return (

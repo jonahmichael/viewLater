@@ -48,16 +48,16 @@ const LinkList = () => {
   };
 
   const getLinksForSection = (sectionId) => {
-    return links.filter(link => link.section?._id === sectionId);
+    return links.filter(link => link.sectionId === sectionId || link.section?.id === sectionId);
   };
 
   const getUnlistedLinks = () => {
-    return links.filter(link => !link.section);
+    return links.filter(link => !link.sectionId && !link.section);
   };
 
   // If a specific section is selected in sidebar, show its detail view
   if (selectedSection && selectedSection !== 'unlisted') {
-    const section = sections.find(s => s._id === selectedSection);
+    const section = sections.find(s => s.id === selectedSection);
     const sectionLinks = getLinksForSection(selectedSection);
 
     return (
@@ -213,12 +213,12 @@ const LinkList = () => {
 
           {/* Section boxes */}
           {sections.map((section) => {
-            const sectionLinks = getLinksForSection(section._id);
+            const sectionLinks = getLinksForSection(section.id);
             return (
               <Card 
-                key={section._id} 
+                key={section.id} 
                 className="hover:bg-accent/50 transition-colors cursor-pointer"
-                onClick={() => setSelectedSection(section._id)}
+                onClick={() => setSelectedSection(section.id)}
               >
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">

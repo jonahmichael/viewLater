@@ -6,7 +6,7 @@ const {
   createLink,
   updateLink,
   deleteLink
-} = require('../controllers/linkController');
+} = require('../controllers/linkController.sequelize');
 
 // GET /api/links - Get all links (with optional filters)
 router.get('/', getLinks);

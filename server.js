@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 require('dotenv').config();
+const { sequelize, testConnection } = require('./config/database');
+const initializeDatabase = require('./config/initDatabase');
 
 const app = express();
 
@@ -9,25 +10,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected...'))
-.catch(err => console.log('MongoDB connection error:', err));
+// Initialize database connection
+(async () => {
+  try {
+    await testConnection();
+    await initializeDatabase();
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+  }
+})();
 
 // Import routes
-const userRoutes = require('./routes/userRoutes');
 const sectionRoutes = require('./routes/sectionRoutes');
 const linkRoutes = require('./routes/linkRoutes');
 
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to ViewLater API' });
+  res.json({ 
+    message: 'Welcome to ViewLater API',
+    database: 'PostgreSQL',
+    version: '1.0.0'
+  });
 });
 
-app.use('/api/users', userRoutes);
 app.use('/api/sections', sectionRoutes);
 app.use('/api/links', linkRoutes);
 
@@ -38,4 +43,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📊 Using PostgreSQL database`);
+});
