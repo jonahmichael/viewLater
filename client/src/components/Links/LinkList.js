@@ -2,7 +2,10 @@ import React, { useState, useContext } from 'react';
 import { DataContext } from '../../context/DataContext';
 import LinkItem from './LinkItem';
 import LinkForm from './LinkForm';
-import './Links.css';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Plus, X, Folder, FolderOpen } from 'lucide-react';
 
 const LinkList = () => {
   const { 
@@ -10,6 +13,7 @@ const LinkList = () => {
     sections, 
     loading, 
     selectedSection,
+    setSelectedSection,
     createSection 
   } = useContext(DataContext);
   const [showLinkForm, setShowLinkForm] = useState(false);
@@ -57,15 +61,16 @@ const LinkList = () => {
     const sectionLinks = getLinksForSection(selectedSection);
 
     return (
-      <div className="section-detail-view">
-        <div className="section-detail-header">
-          <h2>📁 {section?.name}</h2>
-          <button
-            className="btn-add-link"
-            onClick={() => handleAddLinkToSection(section)}
-          >
-            + Add Link
-          </button>
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Folder className="h-6 w-6" />
+            {section?.name}
+          </h2>
+          <Button onClick={() => handleAddLinkToSection(section)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Link
+          </Button>
         </div>
 
         {showLinkForm && (
@@ -76,7 +81,7 @@ const LinkList = () => {
           />
         )}
 
-        <div className="links-circle-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mt-6">
           {sectionLinks.map((link) => (
             <LinkItem key={link._id} link={link} onEdit={handleEdit} viewMode="circle" />
           ))}
@@ -90,15 +95,16 @@ const LinkList = () => {
     const unlistedLinks = getUnlistedLinks();
 
     return (
-      <div className="section-detail-view">
-        <div className="section-detail-header">
-          <h2>📂 Unlisted Links</h2>
-          <button
-            className="btn-add-link"
-            onClick={() => setShowLinkForm(true)}
-          >
-            + Add Link
-          </button>
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <FolderOpen className="h-6 w-6" />
+            Unlisted Links
+          </h2>
+          <Button onClick={() => setShowLinkForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Link
+          </Button>
         </div>
 
         {showLinkForm && (
@@ -108,7 +114,7 @@ const LinkList = () => {
           />
         )}
 
-        <div className="links-circle-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mt-6">
           {unlistedLinks.map((link) => (
             <LinkItem key={link._id} link={link} onEdit={handleEdit} viewMode="circle" />
           ))}
@@ -119,88 +125,140 @@ const LinkList = () => {
 
   // Main grid view - show all sections as boxes
   return (
-    <div className="sections-grid-view">
-      <div className="grid-header">
-        <h2>Your Sections</h2>
-        <button
-          className="btn-add-section"
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Your Sections</h2>
+        <Button
           onClick={() => setShowSectionForm(!showSectionForm)}
+          variant={showSectionForm ? "outline" : "default"}
         >
-          {showSectionForm ? '✕ Cancel' : '+ Add Section'}
-        </button>
+          {showSectionForm ? (
+            <>
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Section
+            </>
+          )}
+        </Button>
       </div>
 
       {showSectionForm && (
-        <form onSubmit={handleAddSection} className="inline-section-form">
-          <input
+        <form onSubmit={handleAddSection} className="flex gap-2 mb-6">
+          <Input
             type="text"
             placeholder="Enter section name..."
             value={newSectionName}
             onChange={(e) => setNewSectionName(e.target.value)}
             autoFocus
+            className="flex-1"
           />
-          <button type="submit" className="btn-submit">Create</button>
+          <Button type="submit">Create</Button>
         </form>
       )}
 
       {loading ? (
-        <div className="loading">Loading...</div>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       ) : (
-        <div className="sections-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Unlisted section box */}
-          <div className="section-box unlisted-box">
-            <div className="section-box-header">
-              <h3>📂 Unlisted</h3>
-              <button 
-                className="btn-add-to-section"
-                onClick={() => setShowLinkForm(true)}
+          <Card 
+            className="hover:bg-accent/50 transition-colors cursor-pointer"
+            onClick={() => setSelectedSection('unlisted')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FolderOpen className="h-5 w-5" />
+                Unlisted
+              </CardTitle>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLinkForm(true);
+                }}
               >
-                +
-              </button>
-            </div>
-            <div className="section-box-preview">
-              {getUnlistedLinks().slice(0, 6).map((link) => (
-                <div key={link._id} className="preview-circle">
-                  {link.title?.[0] || '🔗'}
-                </div>
-              ))}
-              {getUnlistedLinks().length > 6 && (
-                <div className="preview-circle more">+{getUnlistedLinks().length - 6}</div>
-              )}
-            </div>
-            <div className="section-box-footer">
-              {getUnlistedLinks().length} links
-            </div>
-          </div>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-6 gap-2">
+                {getUnlistedLinks().slice(0, 6).map((link) => (
+                  <div
+                    key={link._id}
+                    className="aspect-square rounded-full bg-accent flex items-center justify-center text-sm font-semibold"
+                  >
+                    {link.title?.[0] || '🔗'}
+                  </div>
+                ))}
+                {getUnlistedLinks().length > 6 && (
+                  <div className="aspect-square rounded-full bg-accent flex items-center justify-center text-xs">
+                    +{getUnlistedLinks().length - 6}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <p className="text-sm text-muted-foreground">
+                {getUnlistedLinks().length} links
+              </p>
+            </CardFooter>
+          </Card>
 
           {/* Section boxes */}
           {sections.map((section) => {
             const sectionLinks = getLinksForSection(section._id);
             return (
-              <div key={section._id} className="section-box">
-                <div className="section-box-header">
-                  <h3>📁 {section.name}</h3>
-                  <button 
-                    className="btn-add-to-section"
-                    onClick={() => handleAddLinkToSection(section)}
+              <Card 
+                key={section._id} 
+                className="hover:bg-accent/50 transition-colors cursor-pointer"
+                onClick={() => setSelectedSection(section._id)}
+              >
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Folder className="h-5 w-5" />
+                    {section.name}
+                  </CardTitle>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddLinkToSection(section);
+                    }}
                   >
-                    +
-                  </button>
-                </div>
-                <div className="section-box-preview">
-                  {sectionLinks.slice(0, 6).map((link) => (
-                    <div key={link._id} className="preview-circle">
-                      {link.title?.[0] || '🔗'}
-                    </div>
-                  ))}
-                  {sectionLinks.length > 6 && (
-                    <div className="preview-circle more">+{sectionLinks.length - 6}</div>
-                  )}
-                </div>
-                <div className="section-box-footer">
-                  {sectionLinks.length} links
-                </div>
-              </div>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-6 gap-2">
+                    {sectionLinks.slice(0, 6).map((link) => (
+                      <div
+                        key={link._id}
+                        className="aspect-square rounded-full bg-accent flex items-center justify-center text-sm font-semibold"
+                      >
+                        {link.title?.[0] || '🔗'}
+                      </div>
+                    ))}
+                    {sectionLinks.length > 6 && (
+                      <div className="aspect-square rounded-full bg-accent flex items-center justify-center text-xs">
+                        +{sectionLinks.length - 6}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <p className="text-sm text-muted-foreground">
+                    {sectionLinks.length} links
+                  </p>
+                </CardFooter>
+              </Card>
             );
           })}
         </div>

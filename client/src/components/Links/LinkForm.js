@@ -1,6 +1,17 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { DataContext } from '../../context/DataContext';
-import './Links.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 
 const LinkForm = ({ editingLink, defaultSection, onClose }) => {
   const { sections, createLink, updateLink } = useContext(DataContext);
@@ -58,17 +69,20 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{editingLink ? 'Edit Link' : 'Add New Link'}</h3>
-          <button className="btn-close" onClick={onClose}>✕</button>
-        </div>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[525px]">
+        <DialogHeader>
+          <DialogTitle>{editingLink ? 'Edit Link' : 'Add New Link'}</DialogTitle>
+          <DialogDescription>
+            {editingLink ? 'Update the link details below' : 'Fill in the details to save a new link'}
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>URL *</label>
-            <input
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="url">URL *</Label>
+            <Input
+              id="url"
               type="url"
               name="url"
               value={formData.url}
@@ -78,9 +92,10 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
-            <label>Title</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
               type="text"
               name="title"
               value={formData.title}
@@ -89,23 +104,26 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
             />
           </div>
 
-          <div className="form-group">
-            <label>Description</label>
-            <textarea
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
               placeholder="Optional description"
-              rows="3"
+              rows={3}
             />
           </div>
 
-          <div className="form-group">
-            <label>Section</label>
+          <div className="space-y-2">
+            <Label htmlFor="section">Section</Label>
             <select
+              id="section"
               name="section"
               value={formData.section}
               onChange={handleChange}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">Unlisted (No section)</option>
               {sections.map((section) => (
@@ -116,28 +134,29 @@ const LinkForm = ({ editingLink, defaultSection, onClose }) => {
             </select>
           </div>
 
-          <div className="form-group">
-            <label>Tags</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <Input
+              id="tags"
               type="text"
               name="tags"
               value={formData.tags}
               onChange={handleChange}
-              placeholder="Separate tags with commas (e.g., blog, tutorial, video)"
+              placeholder="Separate tags with commas"
             />
           </div>
 
-          <div className="form-actions">
-            <button type="button" onClick={onClose} className="btn-cancel">
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
-            </button>
-            <button type="submit" className="btn-primary">
+            </Button>
+            <Button type="submit">
               {editingLink ? 'Update' : 'Add'} Link
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
