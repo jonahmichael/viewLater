@@ -61,9 +61,9 @@ export const DataProvider = ({ children }) => {
     
     // Filter by section
     if (selectedSection && selectedSection !== 'unlisted') {
-      filteredLinks = filteredLinks.filter(link => link.section?._id === selectedSection);
+      filteredLinks = filteredLinks.filter(link => link.section?.id === selectedSection || link.sectionId === selectedSection);
     } else if (selectedSection === 'unlisted') {
-      filteredLinks = filteredLinks.filter(link => !link.section);
+      filteredLinks = filteredLinks.filter(link => !link.section && !link.sectionId);
     }
     
     // Filter by search
@@ -95,7 +95,7 @@ export const DataProvider = ({ children }) => {
   // Create section
   const createSection = async (name) => {
     const newSection = {
-      _id: Date.now().toString(),
+      id: Date.now().toString(),
       name,
       createdAt: new Date().toISOString()
     };
@@ -105,16 +105,16 @@ export const DataProvider = ({ children }) => {
 
   // Update section
   const updateSection = async (id, name) => {
-    setSections(sections.map(s => s._id === id ? { ...s, name } : s));
+    setSections(sections.map(s => s.id === id ? { ...s, name } : s));
     return { success: true };
   };
 
   // Delete section
   const deleteSection = async (id) => {
-    setSections(sections.filter(s => s._id !== id));
+    setSections(sections.filter(s => s.id !== id));
     // Also update links that were in this section
     setLinks(links.map(link => 
-      link.section?._id === id ? { ...link, section: null } : link
+      link.section?.id === id ? { ...link, section: null } : link
     ));
     if (selectedSection === id) setSelectedSection(null);
     return { success: true };
@@ -122,14 +122,15 @@ export const DataProvider = ({ children }) => {
 
   // Create link
   const createLink = async (linkData) => {
-    const section = sections.find(s => s._id === linkData.section);
+    const section = sections.find(s => s.id === linkData.section);
     const newLink = {
-      _id: Date.now().toString(),
+      id: Date.now().toString(),
       url: linkData.url,
       title: linkData.title,
       description: linkData.description,
       tags: linkData.tags || [],
-      section: section ? { _id: section._id, name: section.name } : null,
+      section: section ? { id: section.id, name: section.name } : null,
+      sectionId: section ? section.id : null,
       createdAt: new Date().toISOString()
     };
     const updatedLinks = [newLink, ...links];
@@ -140,15 +141,16 @@ export const DataProvider = ({ children }) => {
 
   // Update link
   const updateLink = async (id, linkData) => {
-    const section = sections.find(s => s._id === linkData.section);
+    const section = sections.find(s => s.id === linkData.section);
     const updatedLinks = links.map(link => 
-      link._id === id ? {
+      link.id === id ? {
         ...link,
         url: linkData.url,
         title: linkData.title,
         description: linkData.description,
         tags: linkData.tags || [],
-        section: section ? { _id: section._id, name: section.name } : null
+        section: section ? { id: section.id, name: section.name } : null,
+        sectionId: section ? section.id : null
       } : link
     );
     setLinks(updatedLinks);
@@ -158,7 +160,7 @@ export const DataProvider = ({ children }) => {
 
   // Delete link
   const deleteLink = async (id) => {
-    const updatedLinks = links.filter(link => link._id !== id);
+    const updatedLinks = links.filter(link => link.id !== id);
     setLinks(updatedLinks);
     updateTags(updatedLinks);
     return { success: true };

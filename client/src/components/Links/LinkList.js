@@ -83,7 +83,7 @@ const LinkList = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mt-6">
           {sectionLinks.map((link) => (
-            <LinkItem key={link._id} link={link} onEdit={handleEdit} viewMode="circle" />
+            <LinkItem key={link.id || link._id} link={link} onEdit={handleEdit} viewMode="circle" />
           ))}
         </div>
       </div>
@@ -116,7 +116,7 @@ const LinkList = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mt-6">
           {unlistedLinks.map((link) => (
-            <LinkItem key={link._id} link={link} onEdit={handleEdit} viewMode="circle" />
+            <LinkItem key={link.id || link._id} link={link} onEdit={handleEdit} viewMode="circle" />
           ))}
         </div>
       </div>
@@ -191,7 +191,7 @@ const LinkList = () => {
               <div className="grid grid-cols-6 gap-2">
                 {getUnlistedLinks().slice(0, 6).map((link) => (
                   <div
-                    key={link._id}
+                    key={link.id || link._id}
                     className="aspect-square rounded-full bg-accent flex items-center justify-center text-sm font-semibold"
                   >
                     {link.title?.[0] || '🔗'}
@@ -240,7 +240,7 @@ const LinkList = () => {
                   <div className="grid grid-cols-6 gap-2">
                     {sectionLinks.slice(0, 6).map((link) => (
                       <div
-                        key={link._id}
+                        key={link.id || link._id}
                         className="aspect-square rounded-full bg-accent flex items-center justify-center text-sm font-semibold"
                       >
                         {link.title?.[0] || '🔗'}

@@ -12,7 +12,7 @@ const LinkItem = ({ link, onEdit, viewMode = 'card' }) => {
     e.stopPropagation();
     e.preventDefault();
     if (window.confirm('Are you sure you want to delete this link?')) {
-      await deleteLink(link._id);
+      await deleteLink(link.id || link._id);
     }
   };
 
